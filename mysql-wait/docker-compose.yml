@@ -1,0 +1,26 @@
+ version: "3"
+ services:
+  mysql-server:
+    container_name: test-mysql
+    environment:
+    - MYSQL_ROOT_PASSWORD=1234
+    image: mysql:5.7.22
+    ports:
+    - 3306
+    volumes:
+    - ./database/mysql/:/docker-entrypoint-initdb.d
+  ping-mysql-server:
+    container_name: test-ping-mysql
+    command: ["./wait-for-it.sh", "test-mysql:3306","-t","36000", "--","./ping-mysql"]
+    depends_on:
+    - mysql-server
+    environment:
+    - MYSQL_HOST=test-mysql
+    - PORT=3306
+    - USER_NAME=root
+    - PASSWORD=1234
+    image: xiaoxinmiao/ping-mysql:0.0.1
+    ports:
+    - 8080
+
+ 
