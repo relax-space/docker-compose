@@ -11,7 +11,7 @@
     - ./database/mysql/:/docker-entrypoint-initdb.d
   ping-mysql-server:
     container_name: test-ping-mysql
-    command: sh -c 'echo "wait mysql..." && /go/bin/wait-for.sh test-mysql:3306 -t 36000 -- ./ping-mysql'
+    command: ["./wait-for-it.sh", "test-mysql:3306","-t","36000", "--","./ping-mysql"]
     depends_on:
     - mysql-server
     environment:
@@ -19,7 +19,7 @@
     - PORT=3306
     - USER_NAME=root
     - PASSWORD=1234
-    image: xiaoxinmiao/ping-mysql:0.0.2
+    image: xiaoxinmiao/ping-mysql:0.0.1
     ports:
     - 8080
 
