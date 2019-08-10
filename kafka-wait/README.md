@@ -1,108 +1,41 @@
-# mysql wait
+# kafka wait
 
 ## start wait-for
 
 
 ```bash
-$ cd ./mysql-wait
+$ cd ./kafka-wait
 $ docker-compose up
+WARNING: The Docker Engine you are using is running in swarm mode.
 
-Creating test-mysql ... done
-Creating test-ping-mysql ... done
-Attaching to test-mysql, test-ping-mysql
-test-mysql           | Initializing database
-test-mysql           | 2019-08-07T18:39:58.141775Z 0 [Warning] TIMESTAMP with implicit DEFAULT value is deprecated. Please use --explicit_defaults_for_timestamp server option (see documentation for more details).
-test-ping-mysql      | wait mysql...
-test-mysql           | 2019-08-07T18:39:58.344876Z 0 [Warning] InnoDB: New log files created, LSN=45790
-test-mysql           | 2019-08-07T18:39:58.390986Z 0 [Warning] InnoDB: Creating foreign key constraint system tables.
+Compose does not use swarm mode to deploy services to multiple nodes in a swarm. All containers will be scheduled on the current node.
 
-........
+To deploy your application across the swarm, use `docker stack deploy`.
 
-test-mysql           | 2019-08-07T18:40:09.838971Z 0 [Note] Event Scheduler: Loaded 0 events
-test-mysql           | 2019-08-07T18:40:09.839686Z 0 [Note] mysqld: ready for connections.
-test-mysql           | Version: '5.7.22'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server (GPL)
-test-ping-mysql      | root 1234 test-mysql 3306
-test-ping-mysql      | ping is ok
+Creating network "kafka-wait_default" with the default driver
+Creating test-kafka     ... done                                                                                                                                                                                                                                       Creating test-zookeeper  ... done                                                                                                                                                                                                                                      Creating `test-ping-kafka` ... done                                                                                                                                                                                                                                      Attaching to test-kafka, test-zookeeper, `test-ping-kafka`
+test-kafka           | waiting for kafka to be ready
+test-zookeeper       | ZooKeeper JMX enabled by default
+test-zookeeper       | Using config: /conf/zoo.cfg
+`test-ping-kafka`      | wait kafka...
+test-zookeeper       | 2019-08-11 07:10:05,695 [myid:] - INFO  [main:QuorumPeerConfig@124] - Reading configuration from: /conf/zoo.cfg
+test-zookeeper       | 2019-08-11 07:10:05,737 [myid:] - INFO  [main:QuorumPeer$QuorumServer@149] - Resolved hostname: test-zookeeper to address: test-zookeeper/192.168.128.3
+test-zookeeper       | 2019-08-11 07:10:05,738 [myid:] - ERROR [main:QuorumPeerConfig@301] - Invalid configuration, only one server specified (ignoring)
 
+......
 
-```
+test-kafka           | [2019-08-11 07:10:08,502] INFO [GroupCoordinator 1]: Starting up. (kafka.coordinator.GroupCoordinator)
+test-kafka           | [2019-08-11 07:10:08,507] INFO [GroupCoordinator 1]: Startup complete. (kafka.coordinator.GroupCoordinator)
+test-kafka           | [2019-08-11 07:10:08,538] INFO [Group Metadata Manager on Broker 1]: Removed 0 expired offsets in 27 milliseconds. (kafka.coordinator.GroupMetadataManager)
+test-kafka           | [2019-08-11 07:10:08,571] INFO Will not load MX4J, mx4j-tools.jar is not in the classpath (kafka.utils.Mx4jLoader$)
+`test-ping-kafka`      | begin ping kafka,test-kafka:9092
+test-kafka           | [2019-08-11 07:10:08,703] INFO Creating /brokers/ids/1 (is it secure? false) (kafka.utils.ZKCheckedEphemeral)
+test-zookeeper       | 2019-08-11 07:10:08,707 [myid:] - INFO  [ProcessThread(sid:0 cport:2181)::PrepRequestProcessor@649] - Got user-level KeeperException when processing sessionid:0x16c7f83484e0000 type:create cxid:0x41 zxid:0x18 txntype:-1 reqpath:n/a Error Path:/
 
-dockerfile
+......
 
-```dockerfile
-FROM golang AS builder
-
-WORKDIR /go/src/ping-mysql
-COPY . .
-# disable cgo
-ENV CGO_ENABLED=0
-# build steps
-RUN echo ">>> 1: go version" && go version
-RUN echo ">>> 2: go get" && go get -v -d
-RUN echo ">>> 3: go install" && go install
-
-FROM alpine
-WORKDIR /go/bin/
-COPY --from=builder /go/bin/ping-mysql ./ping-mysql
-EXPOSE 8080
-CMD ["./ping-mysql"]
-```
-
-## start wait-for-it
-
-```bash
-$ cd ./mysql-wait
-$ docker-compose -f docker-compose-v1.yml up
-
-Creating network "mysql-wait_default" with the default driver
-Creating test-mysql ... done
-Creating test-ping-mysql ... done
-Attaching to test-mysql, test-ping-mysql
-
-test-mysql         | Initializing database
-test-mysql         | 2019-08-02T09:26:41.385255Z 0 [Warning] TIMESTAMP with implicit DEFAULT value is deprecated. Please use --explicit_defaults_for_timestamp server option (see documentation for more details).
-test-mysql         | 2019-08-02T09:26:41.608619Z 0 [Warning] InnoDB: New log files created, LSN=45790
-test-mysql         | 2019-08-02T09:26:41.669049Z 0 [Warning] InnoDB: Creating foreign key constraint system tables.
-test-mysql         | 2019-08-02T09:26:41.736291Z 0 [Warning] No existing UUID has been found, so we assume that this is the first time that this server has been started. Generating a new UUID: a31af784-b507-11e9-a60e-0242ac150002.
-test-mysql         | 2019-08-02T09:26:41.740533Z 0 [Warning] Gtid table is not ready to be used. Table 'mysql.gtid_executed' cannot be opened.
-test-mysql         | 2019-08-02T09:26:41.741032Z 1 [Warning] root@localhost is created with an empty password ! Please consider switching off the --initialize-insecure option.
-test-ping-mysql      | wait-for-it.sh: waiting 36000 seconds for test-mysql:3306
-
-..........
-
-test-mysql         | 2019-08-02T09:26:51.831677Z 0 [Warning] 'tables_priv' entry 'sys_config mysql.sys@localhost' ignored in --skip-name-resolve mode.
-test-mysql         | 2019-08-02T09:26:51.838117Z 0 [Note] Event Scheduler: Loaded 0 events
-test-mysql         | 2019-08-02T09:26:51.838450Z 0 [Note] mysqld: ready for connections.
-test-mysql         | Version: '5.7.22'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server (GPL)
-test-ping-mysql      | wait-for-it.sh: test-mysql:3306 is available after 10 seconds
-test-ping-mysql      | root 1234 test-mysql 3306
-test-ping-mysql      | ping is ok
-
-
-```
-
-dockerfile
-
-```dockerfile
-FROM golang AS builder
-
-WORKDIR /go/src/ping-mysql
-COPY . .
-# disable cgo
-ENV CGO_ENABLED=0
-# build steps
-RUN echo ">>> 1: go version" && go version
-RUN echo ">>> 2: go get" && go get -v -d
-RUN echo ">>> 3: go install" && go install
-
-FROM pangpanglabs/alpine-ssl
-WORKDIR /go/bin/
-RUN apk add --no-cache bash
-COPY --from=builder /go/bin/ping-mysql ./ping-mysql
-COPY --from=builder /go/src/ping-mysql/wait-for-it.sh ./wait-for-it.sh
-RUN chmod +x ./wait-for-it.sh
-EXPOSE 8080
-CMD ["./ping-mysql"]
+test-kafka           | [2019-08-11 07:10:09,388] INFO Partition [ping,0] on broker 1: No checkpointed highwatermark is found for partition ping-0 (kafka.cluster.Partition)
+`test-ping-kafka`      | ping kafka is ok
 
 ```
 
