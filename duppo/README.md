@@ -1,0 +1,1 @@
+docker-compose -f .\duppo\docker-compose.yml up -d
