@@ -1,15 +1,15 @@
 
 services:
-  mysql-server:
-    image: mysql:5.7.22
-    container_name: mysql
-    environment:
-    - MYSQL_ROOT_PASSWORD=1234
-    restart: always
-    ports:
-    - 3306:3306
-    volumes:
-    - .:/docker-entrypoint-initdb.d
+  # mysql-server:
+  #   image: mysql:5.7.22
+  #   container_name: mysql
+  #   environment:
+  #   - MYSQL_ROOT_PASSWORD=1234
+  #   restart: always
+  #   ports:
+  #   - 3306:3306
+  #   volumes:
+  #   - .:/docker-entrypoint-initdb.d
   zoo-server:
     image: zookeeper
     container_name: zookeeper

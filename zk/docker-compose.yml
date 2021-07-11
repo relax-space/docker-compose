@@ -1,0 +1,36 @@
+
+services:
+  mysql-server:
+    image: mysql:5.7.22
+    container_name: mysql
+    environment:
+    - MYSQL_ROOT_PASSWORD=1234
+    restart: always
+    ports:
+    - 3306:3306
+    volumes:
+    - .:/docker-entrypoint-initdb.d
+  zoo1:
+    image: zookeeper
+    container_name: zoo1
+    hostname: zoo1
+    restart: always
+    ports:
+      - 2181:2181
+      - 2888
+      - 3888
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181
+  redis-server: 
+    image: redis
+    container_name: redis
+    restart: always
+    command: redis-server --requirepass 123456
+    ports:
+     - 6379:6379
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+     - REDIS_REPLICATION_MODE=master
+version: "3"
